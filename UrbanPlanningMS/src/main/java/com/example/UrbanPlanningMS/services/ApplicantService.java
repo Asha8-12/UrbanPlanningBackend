@@ -83,6 +83,11 @@ public class ApplicantService {
         return applicantRepository.save(applicant);
     }
 
+    public long countApplicants() {
+        return applicantRepository.count();
+    }
+
+
 
 
     public Optional<Applicant> getByEmail(String email) {

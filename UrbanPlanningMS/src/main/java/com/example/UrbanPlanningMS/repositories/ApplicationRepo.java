@@ -14,4 +14,9 @@ public interface ApplicationRepo extends JpaRepository<Application, Long> {
     List<Application> findByCurrentStep(String step);
     List<Application> findByStatus(ApplicationStatus status);
     List<Application> findByStatusAndCurrentStep(ApplicationStatus status, String step);
+    List<Application> findByPaymentConfirmedFalse();
+    Long countByStatus(ApplicationStatus status);
+
+
+
 }

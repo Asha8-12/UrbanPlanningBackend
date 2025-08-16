@@ -24,21 +24,26 @@ public class Application {
 
     private Double latitude;
     private Double longitude;
-
     private String landTitlePath;
     private String projectType;
     private String projectDescription;
     private String estimatedCost;
     private String startDate;
     private String duration;
+    private String currencyUnit;
+    private String durationUnit;
 
+    private String propertySizeUnit;
     private String architectureDrawingPath;
     private String structuralDrawingPath;
     private String supportLetterPath;
-
     private String controlNumber;
     private boolean paymentConfirmed = false;
     private Double paymentAmount;
+
+    private LocalDateTime dateRejected;
+
+    private String picture;
 
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status = ApplicationStatus.PENDING;
@@ -245,5 +250,37 @@ public class Application {
 
     public void setPermitPath(String permitPath) {
         this.permitPath = permitPath;
+    }
+
+    public LocalDateTime getDateRejected() {
+        return dateRejected;
+    }
+
+    public String getCurrencyUnit() {
+        return currencyUnit;
+    }
+
+    public void setCurrencyUnit(String currencyUnit) {
+        this.currencyUnit = currencyUnit;
+    }
+
+    public String getDurationUnit() {
+        return durationUnit;
+    }
+
+    public void setDurationUnit(String durationUnit) {
+        this.durationUnit = durationUnit;
+    }
+
+    public void setDateRejected(LocalDateTime dateRejected) {
+        this.dateRejected = dateRejected;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

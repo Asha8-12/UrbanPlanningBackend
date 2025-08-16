@@ -36,10 +36,13 @@ public class ApplicationController {
             @RequestParam String estimatedCost,
             @RequestParam String startDate,
             @RequestParam String duration,
+            @RequestParam String currencyUnit,
+            @RequestParam String durationUnit,
             @RequestParam("landTitle") MultipartFile landTitle,
             @RequestParam("architecture") MultipartFile architecture,
             @RequestParam("structure") MultipartFile structure,
-            @RequestParam("support") MultipartFile support
+            @RequestParam("support") MultipartFile support,
+            @RequestParam("picture") MultipartFile picture
     ) {
         try {
             Application app = new Application();
@@ -56,8 +59,11 @@ public class ApplicationController {
             app.setEstimatedCost(estimatedCost);
             app.setStartDate(startDate);
             app.setDuration(duration);
+            app.setCurrencyUnit(currencyUnit);
+            app.setDurationUnit(durationUnit);
 
-            return ResponseEntity.ok(service.submit(app, landTitle, architecture, structure, support));
+
+            return ResponseEntity.ok(service.submit(app, landTitle, architecture, structure, support, picture));
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());
         }
@@ -82,10 +88,16 @@ public class ApplicationController {
         return service.getByEmail(email);
     }
 
-    @GetMapping("/status")
-    public List<Application> getByStatus(@RequestParam ApplicationStatus status) {
-        return service.getByStatus(status);
+    @GetMapping("/count/all")
+    public ResponseEntity<Long> countAll() {
+        return ResponseEntity.ok(service.count());
     }
+
+
+//    @GetMapping("/status")
+//    public List<Application> getByStatus(@RequestParam ApplicationStatus status) {
+//        return service.getByStatus(status);
+//    }
 
     @GetMapping("/pending")
     public List<Application> pendingByOfficer(@RequestParam String position) {
@@ -146,6 +158,41 @@ public class ApplicationController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error: " + e.getMessage());
         }
+
+    }
+
+    @GetMapping("/rejected")
+    public List<Application> rejectedByOfficer(@RequestParam String position) {
+        return service.getByStatusAndPosition(ApplicationStatus.REJECTED, position);
+    }
+    @GetMapping("/status")
+    public List<Application> getByStatus(
+            @RequestParam ApplicationStatus status,
+            @RequestParam(required = false) String position) {
+        if (position == null || position.isEmpty()) {
+            return service.getByStatus(status);
+        } else {
+            return service.getByStatusAndPosition(status, position);
+        }
+    }
+    @GetMapping("/approved/all")
+    public List<Application> getAllApproved() {
+        return service.getByStatus(ApplicationStatus.APPROVED);
+    }
+
+    @GetMapping("/count/approved")
+    public ResponseEntity<Long> countApproved() {
+        return ResponseEntity.ok(service.getByStatus(ApplicationStatus.APPROVED).stream().count());
+    }
+
+    @GetMapping("/count/rejected")
+    public ResponseEntity<Long> countRejected() {
+        return ResponseEntity.ok(service.getByStatus(ApplicationStatus.REJECTED).stream().count());
+    }
+
+    @GetMapping("/pending-payments")
+    public List<Application> getPendingPayments() {
+        return service.getPendingPayments();
     }
 
 

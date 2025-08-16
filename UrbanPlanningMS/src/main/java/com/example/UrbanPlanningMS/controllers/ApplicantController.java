@@ -54,6 +54,12 @@ public class ApplicantController {
         return applicantService.getApplicants();
     }
 
+    @GetMapping("/count")
+    public long countApplicants() {
+        return applicantService.countApplicants();
+    }
+
+
     // Admin or Applicant can update
     @PutMapping("/update/{oldEmail}")
     public ResponseEntity<?> update(@PathVariable String oldEmail,
@@ -92,10 +98,8 @@ public class ApplicantController {
         } else {
             return ResponseEntity.status(404).body("Applicant not found with ID: " + id);
         }
+
     }
-
-
-
 
 }
 

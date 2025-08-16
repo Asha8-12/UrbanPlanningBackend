@@ -28,7 +28,7 @@ public class ApplicationService {
     private JavaMailSender mailSender;
 
     public Application submit(Application app, MultipartFile landTitle, MultipartFile architecture,
-                              MultipartFile structure, MultipartFile support) throws IOException {
+                              MultipartFile structure, MultipartFile support, MultipartFile picture) throws IOException {
 
         String basePath = "uploads/";
         Files.createDirectories(Paths.get(basePath));
@@ -37,6 +37,7 @@ public class ApplicationService {
         app.setArchitectureDrawingPath(saveFile(basePath, architecture));
         app.setStructuralDrawingPath(saveFile(basePath, structure));
         app.setSupportLetterPath(saveFile(basePath, support));
+        app.setPicture(saveFile(basePath, picture));
 
         double amount = calculateAmount(app.getPlotNumber(), app.getPropertySize());
         String controlNo = "20010611" + String.format("%02d", (int)(Math.random() * 90 + 10));
@@ -215,11 +216,15 @@ public class ApplicationService {
         app.setStatus(ApplicationStatus.REJECTED);
         app.setRemarks(remarks);
 
+        // Hii ndiyo sehemu muhimu: kuweka tarehe ya kukataliwa sasa hivi
+        app.setDateRejected(LocalDateTime.now());
+
         sendEmail(app.getEmail(), "Application Rejected",
                 "Your application was rejected by " + position + ". Reason: " + remarks);
 
         return repo.save(app);
     }
+
 
     private void sendEmail(String to, String subject, String body) {
         SimpleMailMessage msg = new SimpleMailMessage();
@@ -228,13 +233,28 @@ public class ApplicationService {
         msg.setText(body);
         mailSender.send(msg);
     }
+    // ✅ Count all applications
+    public long count() {
+        return repo.count();
+    }
 
     public Application getApplicationById(Long id) {
         return repo.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
     }
 
+    public List<Application> getPendingPayments() {
+        return repo.findByPaymentConfirmedFalse();
+    }
+
+    public Long countByStatus(ApplicationStatus status) {
+        return repo.countByStatus(status);
+    }
+
+
     // ✅ NEW: For saving updated application in controller
     public Application saveApplication(Application app) {
         return repo.save(app);
     }
+
+
 }

@@ -85,6 +85,10 @@ public class OfficerService {
 
         return officerRepo.save(existingOfficer);
     }
+    public long count() {
+        return officerRepo.count();
+    }
+
 
 
 }

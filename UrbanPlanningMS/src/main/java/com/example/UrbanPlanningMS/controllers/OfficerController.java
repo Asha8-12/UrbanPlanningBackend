@@ -47,6 +47,11 @@ public class OfficerController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Officer not found"));
     }
 
+    @GetMapping("/count")
+    public long countOfficer() {
+        return officerService.count();
+    }
+
     @DeleteMapping("/delete/{email}")
     public ResponseEntity<String> deleteOfficer(@PathVariable String email) {
         try {
