@@ -2,10 +2,11 @@ package com.example.UrbanPlanningMS.controllers;
 
 import com.example.UrbanPlanningMS.models.Applicant;
 import com.example.UrbanPlanningMS.services.ApplicantService;
+import com.example.UrbanPlanningMS.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,9 @@ public class ApplicantController {
 
     @Autowired
     private ApplicantService applicantService;
+
+    @Autowired
+    private UserService userService;
 
     // Register applicant and user
     @PostMapping("/register")
@@ -30,18 +34,42 @@ public class ApplicantController {
             applicant.setName(name);
             applicant.setEmail(email);
             applicant.setPhone(phone);
-
-            Applicant savedApplicant = applicantService.register(applicant, password, role);
+            String hashedPassword = hashPassword(password);
+            Applicant savedApplicant = applicantService.register(applicant, hashedPassword, role);
             return ResponseEntity.ok(savedApplicant);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    // Login using the UserService
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+        try {
+            userService.login(email, password, null); // Pass null for HttpSession as it should be handled in the controller
+            return ResponseEntity.ok("Login successful");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hashBytes = md.digest(password.getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("MD5 hashing failed", e);
+        }
+    }
+
     @GetMapping("/by-email")
     public ResponseEntity<?> getByEmail(@RequestParam String email) {
         Optional<Applicant> applicantOpt = applicantService.getByEmail(email);
-
         if (applicantOpt.isPresent()) {
             return ResponseEntity.ok(applicantOpt.get());
         } else {
@@ -58,7 +86,6 @@ public class ApplicantController {
     public long countApplicants() {
         return applicantService.countApplicants();
     }
-
 
     // Admin or Applicant can update
     @PutMapping("/update/{oldEmail}")
@@ -88,18 +115,13 @@ public class ApplicantController {
         }
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
         Optional<Applicant> applicantOpt = applicantService.getById(id);
-
         if (applicantOpt.isPresent()) {
             return ResponseEntity.ok(applicantOpt.get());
         } else {
             return ResponseEntity.status(404).body("Applicant not found with ID: " + id);
         }
-
     }
-
 }
-
